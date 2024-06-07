@@ -1,6 +1,7 @@
 # web-condenser-ai
 
 A generative AI app creates condensed buzz, powered by [Langchain](https://www.langchain.com) and [Streamlit](https://streamlit.io). Paste web links and condense them!
+![demo](assets/video/demo.gif)
 
 ## Quickstart
 
