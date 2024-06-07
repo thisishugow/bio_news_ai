@@ -1,0 +1,12 @@
+#! /bin/bash
+VERSION=$2
+rm dist/*.whl
+poetry build
+# 如果VERSION未提供，設置默認值
+if [ -z "$VERSION" ]; then
+    VERSION='latest'
+fi
+TAG="$VERSION"
+podman build --pull --rm \
+-f dockerfile \
+-t "web-condenser-ai:$TAG" ./
