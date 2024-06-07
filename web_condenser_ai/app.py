@@ -1,4 +1,5 @@
 import re
+import time
 import streamlit as st
 from web_condenser_ai.tools.degest import generate_digestion, read_from_urls
 from web_condenser_ai.utils import keys, conf
@@ -17,7 +18,7 @@ def login():
     with login_form.form("login"):
         st.write("### Login")
         st.text_input("Password", type="password", key="password", label_visibility='collapsed')
-        st.form_submit_button("Submit", )
+        st.form_submit_button("Login", )
 
     input_login_pswd = st.session_state.get("password", '')
     if input_login_pswd==PASSWORD:
@@ -35,7 +36,34 @@ def _clean_url(url):
     return re.sub(r'^[\'\"\s]+|[\'\"\s]+$', '', url)
 
 
-def run_streamlit_ui():
+def run_ai():
+    content_urls:list[str] = []
+    for i in range(st.session_state["urls_num"]):
+        _key = f"url_{i+1}"
+        if _url:=st.session_state[_key]:
+            content_urls.append(_clean_url(_url))
+
+    llm, model_name = tuple(st.session_state['llm'].split(': '))
+    t0 = time.time()
+    with st.spinner("Scraping contents from urls ..."):
+        data = read_from_urls(content_urls)
+    t1 = time.time()
+    st.success(f"Contents downloaded. (⏱️ {round(t1-t0, 2)}s)", icon="✅")
+    with st.spinner("AI is digesting ..."):
+        resp = generate_digestion(
+            contents=data, 
+            tone=st.session_state['tone'],
+            use_llm=llm,
+            model_name=model_name,
+        )
+    t2 = time.time()
+    st.success(f"Contents condensed. (⏱️ {round(t2-t1, 2)}s)", icon="✅")
+    
+    st.divider()
+    st.info(resp)
+    st.code(resp, language='markdown')
+
+def urls_form():
     for i in range(st.session_state["urls_num"]):
         _i = i +1
         _ = st.text_input(
@@ -47,25 +75,7 @@ def run_streamlit_ui():
     submitted = st.form_submit_button("Submit", )
     
     if submitted:
-        content_urls:list[str] = []
-        for i in range(st.session_state["urls_num"]):
-            _key = f"url_{i+1}"
-            if _url:=st.session_state[_key]:
-                content_urls.append(_clean_url(_url))
-
-        llm, model_name = tuple(st.session_state['llm'].split(': '))
-        
-        data = read_from_urls(content_urls)
-        resp = generate_digestion(
-            contents=data, 
-            tone=st.session_state['tone'],
-            use_llm=llm,
-            model_name=model_name,
-        )
-        st.divider()
-        st.info(resp)
-        st.code(resp, language='markdown')
-
+        run_ai()
 
 
 def init_page_cnf():
@@ -127,8 +137,8 @@ def main():
     if st.session_state.get('password', 0)==PASSWORD:
         side_bar()
         with st.form("myform"):
-            st.write(f"**News URLs**")
-            run_streamlit_ui()
+            st.write(f"**Source URLs**")
+            urls_form()
 
     footer()
     

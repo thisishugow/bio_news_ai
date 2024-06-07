@@ -52,7 +52,7 @@ Then visit http://localhost:8501 to see your app.
 
 - Customize prompts  
   - Prompts are stored in `web_condenser_ai/prompts`. 
-  - Prompts are grouped by **System role**.
+  - Prompts are grouped by **System Role**.
   - To customize the prompts, you will need the basic concepts of [LCEL](https://python.langchain.com/v0.2/docs/concepts/#langchain-expression-language-lcel)
   - Edit your own chain in `web_condenser_ai/tools/digest.py`
 - Streamlit UI locates in `web_condenser_ai/app.py`. 

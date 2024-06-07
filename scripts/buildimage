@@ -1,5 +1,5 @@
 #! /bin/bash
-VERSION=$2
+VERSION=$1
 rm dist/*.whl
 poetry build
 # 如果VERSION未提供，設置默認值

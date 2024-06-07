@@ -8,7 +8,7 @@ RUN TZ=Asia/Taipei \
 
 # Install Python 3.11 and PIP
 RUN DEBIAN_FRONTEND=noninteractive apt-get update
-RUN DEBIAN_FRONTEND=noninteractive apt-get install -y wget procps
+RUN DEBIAN_FRONTEND=noninteractive apt-get install -y wget procps chromium chromium-driver
 RUN DEBIAN_FRONTEND=noninteractive apt-get install -y python3.11 python3.11-distutils
 
 RUN wget https://bootstrap.pypa.io/get-pip.py
@@ -24,6 +24,8 @@ WORKDIR /app
 COPY ./dist/web_condenser_ai*.whl /app
 RUN pip3 install /app/web_condenser_ai*.whl
 RUN rm /app/web_condenser_ai*.whl
+
+ENV USE_CHROMIUM yes
 
 ENTRYPOINT [ "python3.11", "-m", "web_condenser_ai" ]
 

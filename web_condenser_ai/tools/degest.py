@@ -1,9 +1,10 @@
+import os
 from typing import Literal
 from langchain.prompts import ChatPromptTemplate
 from langchain_google_genai import GoogleGenerativeAI, HarmBlockThreshold, HarmCategory
 from langchain_openai import ChatOpenAI
 from langchain_core.output_parsers import StrOutputParser
-from langchain_community.document_loaders import SeleniumURLLoader
+from web_condenser_ai.tools.selenium_url_loader import SeleniumURLLoader
 from web_condenser_ai.utils import keys
 from web_condenser_ai.prompts.industrial_analyst import (
     content_divider,
@@ -90,7 +91,13 @@ def read_from_urls(urls:list[str]|str):
     """
     if isinstance(urls, str):
         urls = [urls,]
-    loader = SeleniumURLLoader(urls=urls)
+
+    browser = 'chrome'
+    if os.environ.get('USE_CHROMIUM', False)=='yes':
+        browser = 'chromium'
+        loader = SeleniumURLLoader(urls=urls, browser=browser, executable_path='/usr/bin/chromedriver')
+    else:
+        loader = SeleniumURLLoader(urls=urls, browser=browser)
     data = loader.load()
     return (
         d.page_content 
