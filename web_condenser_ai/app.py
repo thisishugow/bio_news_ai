@@ -2,7 +2,8 @@ import re
 import time
 import streamlit as st
 from web_condenser_ai.tools.degest import generate_digestion, read_from_urls
-from web_condenser_ai.utils import keys, conf
+from web_condenser_ai.utils import keys, conf, html_snippets
+from web_condenser_ai.prompts.sys import sys_role, resp_lang, default_resp_lang
 from web_condenser_ai.__version__ import __version__ as VERSION
 
 PASSWORD:str = keys.PASSWORD
@@ -48,34 +49,63 @@ def run_ai():
     with st.spinner("Scraping contents from urls ..."):
         data = read_from_urls(content_urls)
     t1 = time.time()
-    st.success(f"Contents downloaded. (⏱️ {round(t1-t0, 2)}s)", icon="✅")
+    st.session_state["perf_content_scraping"] = round(t1-t0, 2)
+    tmp_perf1 = st.empty()
+    tmp_perf2 = st.empty()
+
+    tmp_perf1.success(f"Contents downloaded. (⏱️ {round(t1-t0, 2)}s)", icon="✅")
     with st.spinner("AI is digesting ..."):
         resp = generate_digestion(
             contents=data, 
             tone=st.session_state['tone'],
             use_llm=llm,
             model_name=model_name,
+            extra_prompts=st.session_state.get("extra_input", None),
+            role=st.session_state.get('sys_role',),
+            minutes_to_read=st.session_state.get("minutes_to_read", 1),
+            resp_lang=st.session_state.get("resp_lang", default_resp_lang),
         )
     t2 = time.time()
-    st.success(f"Contents condensed. (⏱️ {round(t2-t1, 2)}s)", icon="✅")
-    
-    st.divider()
-    st.info(resp)
-    st.code(resp, language='markdown')
+
+    st.session_state["perf_ai_requesting"] = round(t2-t1, 2)
+    tmp_perf2.success(f"Contents condensed. (⏱️ {round(t2-t1, 2)}s)", icon="✅")
+    st.session_state["response"] = resp
+    tmp_perf1.empty()
+    tmp_perf2.empty()
+
+def show_resp():
+    if resp:=st.session_state.get("response", None):
+        st.toggle("Show raw", key="show_raw_resp",)
+        if st.session_state.get("show_raw_resp", False):
+            st.code(resp, language='markdown')
+        else:
+            st.info(resp)
 
 def urls_form():
-    for i in range(st.session_state["urls_num"]):
-        _i = i +1
-        _ = st.text_input(
-            label=f"News URL {_i}", 
-            placeholder=f"Please input URL {_i}", 
-            label_visibility='collapsed', 
-            key=f"url_{_i}"
-        ) 
-    submitted = st.form_submit_button("Submit", )
+    with st.form("myform"):
+        st.write(f"**Source URLs**")
+        if st.session_state.get("enable_extra_prompt", False):
+            extra_prompt()
+        for i in range(st.session_state["urls_num"]):
+            _i = i +1
+            _ = st.text_input(
+                label=f"News URL {_i}", 
+                placeholder=f"Please input URL {_i}", 
+                label_visibility='collapsed', 
+                key=f"url_{_i}"
+            ) 
+        submitted = st.form_submit_button("Submit", )
     
     if submitted:
         run_ai()
+
+def extra_prompt():
+    st.text_area(
+        label="Extra Prompts", 
+        placeholder="(Optional) Add your own extra prompts.", 
+        key="extra_input",
+        label_visibility="collapsed"
+    )
 
 
 def init_page_cnf():
@@ -91,44 +121,23 @@ def side_bar():
         cnt = st.number_input(label="Number of News", min_value=1, max_value=10, step=1, key='number_input', )
         cnt = int(cnt)
         st.session_state["urls_num"] = cnt
-        options = [
-            "Google: gemini-pro",
-            "Google: gemini-1.5-pro",
-            "Google: gemini-1.5-flash",
-            "OpenAI: gpt-3.5-turbo",
-            "OpenAI: gpt-4-turbo",
-        ]
+        options = conf.LLM
         st.selectbox("LLM", options=options, index=1, key='llm')
-        st.selectbox("Tone", options=['casual', 'confident', 'professor'], index=1, key='tone')
+        st.selectbox("Tone", options=['casual', 'confident', 'teaching'], index=1, key='tone')
+        st.selectbox("System Role", options=sys_role.keys(), index=0, key='sys_role')
+        st.slider("Minutes of Reading", min_value=1, max_value=15, value=1, key="minutes_to_read")
+        st.multiselect(label='Language', options=resp_lang, default=default_resp_lang, key='resp_lang', )
+        st.toggle("Enable Extra Prompts", key="enable_extra_prompt")
         
-
 def footer():
-    styles = {
-        "position": "fixed",
-        "bottom": "0px",
-        "left": "0px",
-        "color":"rgb(49, 51, 63)",
-        "padding": "10px 0 10px 0",
-        "background-color": "rgb(240, 242, 246)",
-        "width": "100%",
-        "text-align": "center"
-    }
-    style_to_str = '; '.join([
-        f"{k}: {v}" for k, v in styles.items()
-    ])
-    footer_snippet = (
-        f"""<div style="{style_to_str}">"""
-        f"""<a href="https://github.com/thisishugow/web_condenser_ai" target="_blank">WebCondenser v{VERSION}</a> | """
-        "Jun 2024 | "
-        """<a  href="https://www.linkedin.com/in/thisisyuwang" target="_blank">Hugo Wang</a>"""
-        "<div style=\"font-size: 12px\">"
-            "<a style=\"color: rgb(49, 51, 63)\" href=\"https://www.colosscious.com/home\" target=\"_blank\">"
-                "Copyright © 2024 Colosscious Co., Ltd."
-            "</a>"
-        "</div>"
-        "</div>"
-    )
-    st.markdown(footer_snippet, unsafe_allow_html=True) 
+    st.markdown(html_snippets.footer, unsafe_allow_html=True) 
+
+def perf_notification():
+    if perf1:=st.session_state.get("perf_content_scraping", 0):
+        st.success(f"Contents downloaded. (⏱️ {perf1}s)", icon="✅")
+
+    if perf2:=st.session_state.get("perf_ai_requesting", 0):
+        st.success(f"Contents condensed. (⏱️ {perf2}s)", icon="✅")
 
 
 def main():
@@ -136,9 +145,9 @@ def main():
     login()
     if st.session_state.get('password', 0)==PASSWORD:
         side_bar()
-        with st.form("myform"):
-            st.write(f"**Source URLs**")
-            urls_form()
+        urls_form()
+        perf_notification()
+        show_resp()
 
     footer()
     

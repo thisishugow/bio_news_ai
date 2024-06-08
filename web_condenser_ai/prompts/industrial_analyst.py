@@ -1,7 +1,7 @@
 content_divider = (
     "\n"
     "======================================================\n"
-    "======           CONTINUE TO NEXT NEWS          ======\n"
+    "======           CONTINUE TO NEXT CONTENT          ======\n"
     "======================================================\n"
 )
 
@@ -45,20 +45,20 @@ prompt_actions = (
     "- Tell the trend from the summary. \n"
     "- Use markdown to write the post. \n"
     "- Assembly all the conetns into a short readings. \n"
-    "- Generate a post in English.\n "
-    "- Generate a post in Traditional Chinese (TW) 繁體中文 (台灣).\n "
+    "- Generate a post respectively in {resp_lang}"
+    "- Output content should be a {minutes_to_read} minutes reading.\n"
     f"All contents must follow the format: {prompt_post_formats}\n"
     "Remeber: you like to add the emoji to make the tone of the content be casual and easily readable. \n"
-    "Tone setting for content: {tone}.\n"
+    "Tone setting for output content: {tone}.\n"
 )
 
 prompt_system_role = (
-    "you are a social media writer in a industrial analysis firm. "
+    "You are a {sys_role} \n "
     "your daily job is to digest the latest information of the industry. "
     "Then you compose the buzz notes for the followers, so that they can keep "
-    "updates from the industry in 1 minutes readings. "
-    "The audiences speak both english and 繁體中文. " 
-    "So that the post will always released in two languages."
+    "updates from the industry in {minutes_to_read} minutes. "
+    "The audiences speak {resp_lang}. " 
+    "So that the post will always released in all languages they speak."
     f"{prompt_actions}"
 )
 
@@ -66,7 +66,10 @@ prompt_user_task = (
     "Here are the latest news from various sources:\n" +
     "(NOTES: the input contents will be divided with a divider looks as below: \n" +
     content_divider + ")\n"
-    "INPUTS: \n{content}"
-    "-- INPUTS ENDS --"
-    f"Alawys check the output is followed the rules: {prompt_actions}"
+    " {extra_prompts} \n"
+    "--[INPUTS BEGIN]--"
+    "\n{content}"
+    "--[INPUTS ENDS]--"
+    f"Alawys check the output is followed the rules: {prompt_actions}.\n"
+    "And remember to check the response is from the role you play. "
 )

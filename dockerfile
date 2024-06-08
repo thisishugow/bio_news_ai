@@ -25,8 +25,8 @@ COPY ./dist/web_condenser_ai*.whl /app
 RUN pip3 install /app/web_condenser_ai*.whl
 RUN rm /app/web_condenser_ai*.whl
 
-ENV USE_CHROMIUM yes
+ENV SELENIUM_WEB_DRIVER chromium
 
-ENTRYPOINT [ "python3.11", "-m", "web_condenser_ai" ]
+ENTRYPOINT [ "python3.11", "-m", "web_condenser_ai", '--data-loader', 'chromium' ]
 
 EXPOSE 8501

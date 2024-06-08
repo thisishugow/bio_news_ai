@@ -11,6 +11,7 @@ from web_condenser_ai.prompts.industrial_analyst import (
     prompt_system_role, 
     prompt_user_task
 )
+from web_condenser_ai.prompts.sys import sys_role
 
 __all__ = [
     "generate_digestion", 
@@ -30,8 +31,8 @@ def get_gemini_llm(model_name:str="gemini-pro")->GoogleGenerativeAI:
     )
     return llm
 
-def get_openai_llm(model:Literal["gpt-3.5-turbo", "gpt-4-turbo"]="gpt-3.5-turbo",)->ChatOpenAI:
-    llm = ChatOpenAI(model_name=model, openai_api_key=keys.OPENAI_API_KEY)
+def get_openai_llm(model_name:Literal["gpt-3.5-turbo", "gpt-4-turbo"]="gpt-3.5-turbo",)->ChatOpenAI:
+    llm = ChatOpenAI(model_name=model_name, openai_api_key=keys.OPENAI_API_KEY)
     return llm
 
 
@@ -40,6 +41,10 @@ def generate_digestion(
     tone:Literal['casual', 'confident', 'professor', ]='casual',
     use_llm:Literal['google', 'openai', 'gemini']='gemini',
     model_name:str=None, 
+    minutes_to_read:int=1, 
+    extra_prompts:str=None,
+    role:str='Social Media Writer',
+    resp_lang: list[str] | str = ["english", "繁體中文 (台灣)"], 
 )->str:
     """
     Generate a digestion from a list of content strings or a single content string.
@@ -73,9 +78,17 @@ def generate_digestion(
     
     if isinstance(contents, str):
         contents = [contents, ]
+
+    if isinstance(resp_lang, list):
+        resp_lang = ', '.join(resp_lang)
+
     resp =  chain.invoke({
         "content": content_divider.join(contents),
         "tone": tone, 
+        "extra_prompts": extra_prompts,
+        "minutes_to_read": minutes_to_read, 
+        "sys_role": sys_role.get(role, 'social media writer in a industrial analysis firm.'), 
+        "resp_lang": resp_lang, 
     })
     return resp
 
@@ -92,9 +105,8 @@ def read_from_urls(urls:list[str]|str):
     if isinstance(urls, str):
         urls = [urls,]
 
-    browser = 'chrome'
-    if os.environ.get('USE_CHROMIUM', False)=='yes':
-        browser = 'chromium'
+    browser = os.environ.get("SELENIUM_WEB_DRIVER", 'chrome')
+    if browser=='chromium':
         loader = SeleniumURLLoader(urls=urls, browser=browser, executable_path='/usr/bin/chromedriver')
     else:
         loader = SeleniumURLLoader(urls=urls, browser=browser)
