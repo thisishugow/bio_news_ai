@@ -11,7 +11,7 @@ load_dotenv(dotenv_file)
 
 APP_TITLE = os.environ.get("APP_TITLE", 'WebCondenser.ai')
 FAVICON = os.environ.get("FAVICON", '')
-
+LOGO = os.environ.get('LOGO', None)
 LLM:list[str] = [
     "Google: gemini-pro",
     "Google: gemini-1.5-pro",
@@ -25,4 +25,5 @@ __all__ = [
     "APP_TITLE",
     "FAVICON",
     "LLM",
+    "LOGO", 
 ]

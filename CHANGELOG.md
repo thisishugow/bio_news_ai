@@ -14,12 +14,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - Use `--data-loader` to set web driver for `SeleniumURLLoader`. Support ["firefox", "chrome", "chromium"]. 
 - Support to select the system role. 
 - Support to select output languages. 
+- Support to set layout and logo by args. 
+- Support to set multiples in `.env`. 
 - [ ] Support Ollama. 
 
 ### Changed
 
 - Login button with label `Login`.
 - Switch preview/raw of response with a toggle. 
+- Update the theme colors. 
 
 
 ## [0.1.0] - 2024-06-07

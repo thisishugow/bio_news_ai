@@ -11,7 +11,7 @@ footer_style = {
     "left": "0px",
     "color":"rgb(49, 51, 63)",
     "padding": "10px 0 10px 0",
-    "background-color": "rgb(240, 242, 246)",
+    "background-color": "#E7ECEF",
     "width": "100%",
     "text-align": "center", 
 }

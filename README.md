@@ -21,16 +21,30 @@ touch .env
 ```
 
 
-Then you should add the API Key of OpenAI and Gemini, and your password for login into `.env` file. Example: 
+Add your OpenAI and Google API keys, along with your login password, to the `.env` file. Example:
 
-```
+```bash
 OPENAI_API_KEY=sk-wewifo4woivm48jiome***1i3co23iFJ3imomcu81ecke2cN
 GOOGLE_API_KEY=AIeic8cuemYuemvo28vh316s0a9HW72kdwopwet
-PASSWORD=mypassword
+PASSWORD=mypassword,guestpassword # You can set multiple passwords separated by commas
 
 # You can add the app title and favicon by setting following variables
 APP_TITLE=BioNews.ai
 FAVICON=favicon.ico
+LOGO=yourlogo.png
+```
+Alternatively, you can use command-line arguments to set your preferences. Command-line arguments have a higher priority than settings in the `.env` file.
+```bash
+python -m web_condenser_ai --help
+# options:
+#   -h, --help            show this help message and exit
+#   --data-loader {chrome,chromium}
+#                         The webdriver for selenium.
+#   --app-name APP_NAME   The name of the app.
+#   --layout {wide,centered}
+#                         The layout of the app.
+#   --logo LOGO           The file path of the logo.
+#   --favicon FAVICON     The file path of favicon.
 ```
 
 
