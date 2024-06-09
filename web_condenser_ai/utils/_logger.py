@@ -42,7 +42,7 @@ class CustomFormatter(logging.Formatter):
     red = "\x1b[31;20m"
     bold_red = "\x1b[31;1m"
     reset = "\x1b[0m"
-    format = string.Template("%(asctime)s | %(name)s | $color%(levelname)s\x1b[0m | (%(filename)s:%(lineno)d) | %(message)s ")
+    format = string.Template("%(asctime)s | %(name)s | $color%(levelname)s\x1b[0m | %(filename)s:%(lineno)d | %(message)s ")
 
     FORMATS = {
         logging.DEBUG: format.substitute({"color":grey}),
@@ -155,7 +155,7 @@ def _get_file_handers(dirname:os.PathLike='Log'):
     if not os.path.isdir(dirname):
         os.makedirs(dirname)
 
-    formatter = logging.Formatter("%(asctime)s.%(msecs)03d | %(module)-10s| %(levelname)-4s | %(message)s")
+    formatter = logging.Formatter("%(asctime)s | %(name)s | %(levelname)s | %(filename)s:%(lineno)d | %(message)s ")
 
     # Create file handler for trace.log
     file_handler = TimedRotatingFileHandler(f'{dirname}/trace.log', when='midnight', interval=1, backupCount=30, encoding='utf8')

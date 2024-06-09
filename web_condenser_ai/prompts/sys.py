@@ -5,19 +5,24 @@ sys_role:dict[str, dict] = {
 }
 
 resp_lang:list = [
+    "繁體中文 (Mandarin TW)", 
     "English", 
-    "繁體中文", 
-    "Japanese", 
-    "Korean", 
-    "Spanish",
-    "French", 
-    "Tiếng Việt",
+    "日本語 (Japanese)", 
+    "한국어 (Korean)", 
+    "Español (Spanish)",
+    "Français (French)", 
+    "Tiếng Việt (Vietnamese)",
     "แบบไทย (Thai)",
+    "Deutsch (German)", 
+    "Türkçe (Turkish)", 
+    "bahasa Indonesia (Indonesian)", 
+    "Русский (Russian)", 
+    "Italiano (Italian)",
 ] 
 
 default_resp_lang:list[str] = [
+    "繁體中文 (Mandarin TW)", 
     "English", 
-    "繁體中文", 
 ]
 
 __all__ = [
