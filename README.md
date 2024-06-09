@@ -45,6 +45,7 @@ python -m web_condenser_ai --help
 #                         The layout of the app.
 #   --logo LOGO           The file path of the logo.
 #   --favicon FAVICON     The file path of favicon.
+#   --log-path LOG_PATH   The directory path to dump log. Default logging on the console only. 
 ```
 
 

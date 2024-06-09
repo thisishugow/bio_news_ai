@@ -3,9 +3,10 @@ import os
 import time
 import streamlit as st
 from web_condenser_ai.tools.degest import generate_digestion, read_from_urls
-from web_condenser_ai.utils import keys, conf, html_snippets
+from web_condenser_ai.utils import keys, conf, html_snippets, CustomFormatter
 from web_condenser_ai.prompts.sys import sys_role, resp_lang, default_resp_lang
 from web_condenser_ai.__version__ import __version__ as VERSION
+from web_condenser_ai.utils import get_runtime_ctx, get_logger
 
 PASSWORDS:list[str] = [
     p.strip() for p in keys.PASSWORD.split(',') if len(p.strip())>0]
@@ -14,6 +15,7 @@ FAVICON = os.getenv("STREAMLIT_APP_FAVICON", conf.FAVICON)
 LOGO = os.getenv("STREAMLIT_APP_LOGO", conf.LOGO)
 LAYOUT = os.environ.get("STREAMLIT_APP_LAYOUT", "centered")
 refresh_url_input = 0
+log = get_logger(__name__, os.getenv('STREAMLIT_LOG_PATH', False))
 
 if st.session_state.get("urls_num", None) is None:
     st.session_state["urls_num"] = 1
@@ -50,9 +52,10 @@ def login():
         st.write("### Login")
         st.text_input("Password", type="password", key="password", label_visibility='collapsed')
         st.form_submit_button("Login", )
-
+    sess_client = get_runtime_ctx()
     input_login_pswd = st.session_state.get("password", '')
     if input_login_pswd in PASSWORDS:
+        log.info(f"User(identity={input_login_pswd}) login from {sess_client.request.remote_ip}")
         login_form.empty()
     elif len(input_login_pswd)==0:
         st.info('Login with the password.')
@@ -73,8 +76,13 @@ def run_ai():
         _key = f"url_{i+1}"
         if _url:=st.session_state[_key]:
             content_urls.append(_clean_url(_url))
-
     llm, model_name = tuple(st.session_state['llm'].split(': '))
+    password=st.session_state.get('password')
+    log.info((
+        f"User(identity={password}) requested "
+        f"((total={len(content_urls)}, urls={content_urls}, model=\"{model_name}\")), "
+        f"extra_prompt=\"{repr(st.session_state.get('extra_input', 'None'))}\"))"
+    ))
     t0 = time.time()
     with st.spinner("Scraping contents from urls ..."):
         data = read_from_urls(content_urls)
