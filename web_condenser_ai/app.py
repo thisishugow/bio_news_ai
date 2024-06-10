@@ -3,9 +3,8 @@ import os
 import time
 import streamlit as st
 from web_condenser_ai.tools.degest import generate_digestion, read_from_urls
-from web_condenser_ai.utils import keys, conf, html_snippets, CustomFormatter
+from web_condenser_ai.utils import keys, conf, html_snippets
 from web_condenser_ai.prompts.sys import sys_role, resp_lang, default_resp_lang
-from web_condenser_ai.__version__ import __version__ as VERSION
 from web_condenser_ai.utils import get_runtime_ctx, get_logger
 
 PASSWORDS:list[str] = [
@@ -42,7 +41,7 @@ def side_bar():
         st.selectbox("Tone", options=['casual', 'confident', 'teaching'], index=1, key='tone')
         st.selectbox("System Role", options=sys_role.keys(), index=0, key='sys_role')
         st.slider("Minutes of Reading", min_value=1, max_value=15, value=1, key="minutes_to_read")
-        st.multiselect(label='Language', options=resp_lang, default=default_resp_lang, key='resp_lang', )
+        st.multiselect(label='Language (up to 3)', options=resp_lang, default=default_resp_lang, key='resp_lang', max_selections=3)
         st.toggle("Extra Prompt", key="enable_extra_prompt")
 
 
@@ -55,7 +54,9 @@ def login():
     sess_client = get_runtime_ctx()
     input_login_pswd = st.session_state.get("password", '')
     if input_login_pswd in PASSWORDS:
-        log.info(f"User(identity={input_login_pswd}) login from {sess_client.request.remote_ip}")
+        if st.session_state.get('is_login', None) is None:
+            log.info(f"User(identity={input_login_pswd}) login from {sess_client.request.remote_ip}")
+            st.session_state['is_login'] = True
         login_form.empty()
     elif len(input_login_pswd)==0:
         st.info('Login with the password.')
@@ -160,7 +161,7 @@ def perf_notification():
 def main():
     init_page_cnf()
     login()
-    if st.session_state.get('password', 0) in PASSWORDS:
+    if st.session_state.get('is_login', False):
         side_bar()
         urls_form()
         perf_notification()
