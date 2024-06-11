@@ -18,6 +18,7 @@ LLM:list[str] = [
     "Google: gemini-1.5-flash",
     "OpenAI: gpt-3.5-turbo",
     "OpenAI: gpt-4-turbo",
+    "OpenAI: gpt-4o"
 ] 
 
 

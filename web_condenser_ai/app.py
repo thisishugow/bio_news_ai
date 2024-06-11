@@ -1,23 +1,26 @@
 import re
 import os 
 import time
+
 import streamlit as st
 from web_condenser_ai.tools.degest import generate_digestion, read_from_urls
 from web_condenser_ai.utils import keys, conf, html_snippets
 from web_condenser_ai.prompts.sys import sys_role, resp_lang, default_resp_lang
 from web_condenser_ai.utils import get_runtime_ctx, get_logger
+from web_condenser_ai.components.gmail_login_btn import gmail_login_btn
 
-PASSWORDS:list[str] = [
-    p.strip() for p in keys.PASSWORD.split(',') if len(p.strip())>0]
+PASSWORDS:list[str] = [p.strip() for p in keys.PASSWORD.split(',') if len(p.strip())>0]
 APP_TITLE = os.getenv("STREAMLIT_APP_NAME", conf.APP_TITLE)
 FAVICON = os.getenv("STREAMLIT_APP_FAVICON", conf.FAVICON)
 LOGO = os.getenv("STREAMLIT_APP_LOGO", conf.LOGO)
 LAYOUT = os.environ.get("STREAMLIT_APP_LAYOUT", "centered")
+GCP_OAUTH_CLIENT_ID = os.getenv("GCP_OAUTH_CLIENT_ID", None)
 refresh_url_input = 0
 log = get_logger(__name__, os.getenv('STREAMLIT_LOG_PATH', False))
 
 if st.session_state.get("urls_num", None) is None:
     st.session_state["urls_num"] = 1
+
 
 def init_page_cnf():
     st.set_page_config(
@@ -44,22 +47,44 @@ def side_bar():
         st.multiselect(label='Language (up to 3)', options=resp_lang, default=default_resp_lang, key='resp_lang', max_selections=3)
         st.toggle("Extra Prompt", key="enable_extra_prompt")
 
+def _login_with_gmail(gsi:dict={}):
+    if gsi is None:
+        return 
+    log.debug(f"Gmail login: {gsi}")
+    st.session_state["gsi"] = gsi
+    
 
 def login():
     login_form = st.empty()
+    third_login_container = st.empty()
     with login_form.form("login"):
         st.write("### Login")
         st.text_input("Password", type="password", key="password", label_visibility='collapsed')
         st.form_submit_button("Login", )
+    oauth_data = {}
+    with third_login_container.container():
+        oauth_data = gmail_login_btn(oauth_client_id=GCP_OAUTH_CLIENT_ID)
+        _login_with_gmail(oauth_data)
     sess_client = get_runtime_ctx()
     input_login_pswd = st.session_state.get("password", '')
-    if input_login_pswd in PASSWORDS:
+    if input_login_pswd in PASSWORDS or st.session_state.get("gsi", False):
         if st.session_state.get('is_login', None) is None:
             log.info(f"User(identity={input_login_pswd}) login from {sess_client.request.remote_ip}")
             st.session_state['is_login'] = True
         login_form.empty()
+        third_login_container.empty()
+        if _pswd:= st.session_state.get('password', False):
+            st.session_state['user_id']  = _pswd
+        else:
+            print(oauth_data.keys())
+            st.session_state['user_id'] = (
+                f"\"{oauth_data.get('given_name')} {oauth_data.get('family_name')}\":"
+                f"\"{oauth_data.get('email')}\""
+            )
+        log.info(f"User(identity={st.session_state['user_id']}) login from {sess_client.request.remote_ip}")
+
     elif len(input_login_pswd)==0:
-        st.info('Login with the password.')
+        st.info('Login with a password or with gmail.')
     else:
         st.error((
             "Invalid password. Please try again.\n "
@@ -78,9 +103,9 @@ def run_ai():
         if _url:=st.session_state[_key]:
             content_urls.append(_clean_url(_url))
     llm, model_name = tuple(st.session_state['llm'].split(': '))
-    password=st.session_state.get('password')
+    _user=st.session_state.get('user_id')
     log.info((
-        f"User(identity={password}) requested "
+        f"User(identity={_user}) requested "
         f"((total={len(content_urls)}, urls={content_urls}, model=\"{model_name}\")), "
         f"extra_prompt=\"{repr(st.session_state.get('extra_input', 'None'))}\"))"
     ))

@@ -40,25 +40,25 @@ prompt_post_formats = (
 
 prompt_actions = (
     "Actions: "
-    "- Read all the news. \n"
-    "- Summarize the news. \n"
-    "- Tell the trend from the summary. \n"
+    "- Read all the contents. \n"
+    "- Summarize the contents. \n"
+    "- Tell the trend or insights from the summary. \n"
     "- Use markdown to write the post. \n"
-    "- Assembly all the conetns into a short readings. \n"
-    "- Generate a post respectively in {resp_lang}"
+    "- Assembly all the contents into an insightful and precise readings. \n"
+    "- Generate a copy for each of the following speakers of languages: {resp_lang}"
     "- Output content should be a {minutes_to_read} minutes reading.\n"
     f"All contents must follow the format: {prompt_post_formats}\n"
-    "Remeber: you like to add the emoji to make the tone of the content be casual and easily readable. \n"
+    "Remember: you like to add the emoji to make the tone of the content be casual and easily readable. \n"
     "Tone setting for output content: {tone}.\n"
 )
 
 prompt_system_role = (
     "You are a {sys_role} \n "
-    "your daily job is to digest the latest information of the industry. "
-    "Then you compose the buzz notes for the followers, so that they can keep "
+    "your job is to digest the latest information of the industry. "
+    "Then you compose the insightful notes for the followers, so that they can keep "
     "updates from the industry in {minutes_to_read} minutes. "
     "The audiences speak {resp_lang}. " 
-    "So that the post will always released in all languages they speak."
+    "So that the output will always be released in all languages they speak."
     f"{prompt_actions}"
 )
 
