@@ -51,7 +51,7 @@ python -m web_condenser_ai --help
 
 **Start app**
 ```bash
-python -m web_condenser_ai
+python -m web_condenser_ai --app-name WebCondenser.ai --log-path Log
 ```
 
 Then visit http://localhost:8501 to see your app. 

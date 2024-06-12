@@ -5,20 +5,24 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [UNRELEASED]
+### Added
+- [ ] Support Ollama. 
+- [ ] Support login with Google Oauth API. 
+
+
+## [0.1.1] - 2024-06-12
 
 ### Added
 
 - Enhanced `SeleniumUrlLoader` with running with `chromium-driver`. 
 - Running spinner and elapsed time counter. 
 - Support extra prompts.
-- Use `--data-loader` to set web driver for `SeleniumURLLoader`. Support ["firefox", "chrome", "chromium"]. 
+- Use `--data-loader` to set web driver for `SeleniumURLLoader`. Support `["firefox", "chrome", "chromium"]`. 
 - Support to select the system role. 
 - Support to select output languages. 
 - Support to set layout and logo by args. 
 - Support to set multiples in `.env`. 
 - Add logging. 
-- Support more languages. 
-- [ ] Support Ollama. 
 
 ### Changed
 
